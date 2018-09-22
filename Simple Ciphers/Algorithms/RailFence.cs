@@ -112,8 +112,8 @@ namespace SimpleCiphers
             if (!int.TryParse(KeyValue, out int fenceHeight))
                return "Wrong fence height value!";
 
-            if ((fenceHeight > 100) || (fenceHeight <= 0))
-                return "Fence height more than 100 currently is not supported :(!";
+            if ((fenceHeight > 100) || (fenceHeight <= 1))
+                return "Wrong fence height value :(!";
 
             this.fenceHeight = fenceHeight;
 

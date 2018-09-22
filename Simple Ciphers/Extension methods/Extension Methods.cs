@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SimpleCiphers
 {
@@ -22,6 +18,17 @@ namespace SimpleCiphers
             }
 
             return -1;
+        }
+
+        public static int ReplaceFirstBit(this int value, int bit, int PolynomLength)
+        {
+            string baseString = Convert.ToString(value, 2);
+
+            baseString = baseString.PadLeft(PolynomLength, '0');
+
+            baseString = bit.ToString() + baseString.Substring(1);
+
+            return value = Convert.ToInt32(baseString, 2);
         }
     }
 }

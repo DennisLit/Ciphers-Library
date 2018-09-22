@@ -66,6 +66,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Algorithms\LFSR.cs" />
     <Compile Include="Data\Enums.cs" />
     <Compile Include="Data\LoadedFileItem.cs" />
     <Compile Include="Data\ResourceStrings.cs" />

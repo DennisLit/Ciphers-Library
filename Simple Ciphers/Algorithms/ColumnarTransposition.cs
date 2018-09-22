@@ -132,7 +132,7 @@ namespace SimpleCiphers
                     else
                     {
                         // completing the matrix with '/'
-                        ColumnsArr[i].Add('/');
+                        ColumnsArr[i].Add(' ');
                     }
                 }
             }

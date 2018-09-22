@@ -265,10 +265,10 @@ namespace SimpleCiphers
 
             for(int i = 0; i < stringToFix.Length; ++i)
             {
-                if (Alphabet.Contains(stringToFix[i]) || (stringToFix[i] == ' '))
+                if (Alphabet.Contains(stringToFix[i]))
                     Output += stringToFix[i];
 
-                if((actionKind == Operations.Decipher) && (stringToFix[i] == '/'))
+                if((actionKind == Operations.Decipher) && (stringToFix[i] == ' '))
                     Output += stringToFix[i];
             }
 
