@@ -1,7 +1,7 @@
 ﻿using PropertyChanged;
 using System.ComponentModel;
 
-namespace StreamCipher 
+namespace StreamCipher.Core 
 {
     [AddINotifyPropertyChangedInterface]
 

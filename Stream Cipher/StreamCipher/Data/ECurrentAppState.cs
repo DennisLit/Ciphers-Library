@@ -1,4 +1,4 @@
-﻿namespace StreamCipher
+﻿namespace StreamCipher.Core
 {
     public enum CurrentAppState
     {

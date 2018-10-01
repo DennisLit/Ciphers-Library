@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace StreamCipher 
+namespace StreamCipher.Core 
 {
         public class RelayCommand : ICommand
         {
@@ -9,18 +9,18 @@ namespace StreamCipher
 
             //func that defines if action should be executed right now
 
-            private bool canExecute;
+            private Func<bool> canExecuteMethod;
+         
 
-
-            public RelayCommand(Action action, bool canExecute)
+            public RelayCommand(Action action, Func<bool> canExecuteMethod)
             {
-                this.methodToExecute = action;
-                this.canExecute = canExecute;
+                this.methodToExecute = action; 
+                this.canExecuteMethod = canExecuteMethod;
             }
 
             // if second parameter was not present then command can be executed at any time
 
-            public RelayCommand(Action action) : this(action, true)
+            public RelayCommand(Action action) : this(action, null)
             {
 
             }
@@ -29,7 +29,7 @@ namespace StreamCipher
 
             public bool CanExecute(object parameter)
             {
-                return true;
+                return (canExecuteMethod == null) ? true : canExecuteMethod.Invoke();
             }
 
             public void Execute(object parameter)
@@ -44,20 +44,30 @@ namespace StreamCipher
             private Action<Object> methodToExecute;
 
 
-            private bool canExecute;
+            private Func<bool> canExecuteMethod;
 
 
-            public RelayCommandWithParam(Action<Object> action, bool canExecute)
+            public RelayCommandWithParam(Action<Object> action, Func<bool> canExecuteMethod)
             {
                 this.methodToExecute = action;
-                this.canExecute = canExecute;
+                this.canExecuteMethod = canExecuteMethod;
             }
 
             // if second parameter was not present than command can be executed at any time
 
-            public RelayCommandWithParam(Action<Object> action) : this(action, true)
+            public RelayCommandWithParam(Action<Object> action) : this(action, null)
             {
 
+            }
+
+            public bool CanExecute(object parameter)
+            {
+                return (canExecuteMethod == null) ? true : canExecuteMethod.Invoke();
+            }
+
+            public void Execute(object parameter)
+            {
+                methodToExecute(parameter);
             }
 
             public event EventHandler CanExecuteChanged;
@@ -67,16 +77,6 @@ namespace StreamCipher
                 var handler = CanExecuteChanged;
                 if (CanExecuteChanged != null)
                     handler(this, EventArgs.Empty);
-            }
-
-            public bool CanExecute(object parameter)
-            {
-                return true;
-            }
-
-            public void Execute(object parameter)
-            {
-                methodToExecute(parameter);
             }
 
 

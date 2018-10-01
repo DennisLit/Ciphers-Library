@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Win32;
-using StreamCipher.Core;
 
-namespace StreamCipher
+namespace StreamCipher.Core
 {
+    /// <summary>
+    /// Program to understand the basics of LFSR and Stream cipher. 
+    /// All algorithms there may be unoptimized in sacrifise of understandability
+    /// </summary>
     public class ApplicationViewModel : BaseViewModel
     {
+        #region Public fields
 
         public string MessageText { get; set; }
 
@@ -24,84 +27,151 @@ namespace StreamCipher
         public string InitialStateText { get; set; }
 
         public int State { get; set; } = 0;
-        
-        private string ChosenFile { get; set; }
+
+        public bool IsNoActionRunning { get; set; } = true;
 
         public string StateText { get; set; } = "Waiting for an action...";
 
+        #endregion
 
+        #region Private fields
 
-        public ICommand DoWorkCommand { get { return new RelayCommand(DoWork); } }
+        private string ChosenFile { get; set; }
 
-        public ICommand ChooseFileCommand { get { return new RelayCommand(ChooseFile); } }
+        #endregion
 
+        #region Commands
 
+        public ICommand DoWorkCommand { get { return new RelayCommand(DoWork, () => IsNoActionRunning); } }
 
-        private void ChooseFile()
+        public ICommand ChooseFileCommand { get { return new RelayCommand(ChooseFile, () => IsNoActionRunning); } }
+
+        #endregion
+
+        #region Public methods
+        /// <summary>
+        /// Choosing the file
+        /// </summary>
+        public void ChooseFile()
         {
-            OpenFileDialog file = new OpenFileDialog();
-
-            file.ShowDialog();
-
-            if (string.IsNullOrEmpty(file.FileName))
+            try
             {
-                State = (int)CurrentAppState.LastOperationFailed;
-                StateText = "There was a problem loading that file!";
-                return;
-            }
+                IsNoActionRunning = false;
 
-            ChosenFile = file.FileName;
+                OpenFileDialog file = new OpenFileDialog();
+
+                file.ShowDialog();
+
+                if (string.IsNullOrEmpty(file.FileName))
+                {
+                    State = (int)CurrentAppState.LastOperationFailed;
+                    StateText = "There was a problem loading that file!";
+                    return;
+                }
+
+                StateText = "Successfully opened.";
+                State = (int)CurrentAppState.LastOperationCompleted;
+
+                ChosenFile = file.FileName;
+            }
+            finally { IsNoActionRunning = true; }
+
 
         }
 
-        private async void DoWork()
+        /// <summary>
+        /// Main method
+        /// </summary>
+        public async void DoWork()
         {
-            if(string.IsNullOrWhiteSpace(ChosenFile))
+            try
             {
-                State = (int)CurrentAppState.LastOperationFailed;
-                StateText = "No file is chosen!";
-                return;
+                IsNoActionRunning = false;
+
+                if (string.IsNullOrWhiteSpace(ChosenFile))
+                {
+                    State = (int)CurrentAppState.LastOperationFailed;
+                    StateText = "No file is chosen!";
+                    return;
+                }
+
+                var generator = new LFSR();
+
+                try
+                {
+                    // Read bytes from file and convert to the binary
+
+                    var Message = await Task.Run(() => File.ReadAllBytes(ChosenFile));
+
+                    if (!generator.Initialize(InitialStateText, Message.Length))
+                    {
+                        State = (int)CurrentAppState.LastOperationFailed;
+                        StateText = "Wrong initial state length!";
+                        return;
+                    }
+
+                    State = (int)CurrentAppState.Working;
+                    StateText = "Generating a key using LFSR...";
+
+                    var Key = new byte[Message.Length];
+
+                    await Task.Run(() => Key = generator.GenerateKey());
+
+                    var Result = await Task.Run(() => MainStreamCipher.EncryptDecrypt(Message, Key));
+
+                    MessageText = GetFirst16Bits(Message);
+
+                    GeneratedKeyText = await Task.Run(() => GetFirst16Bits(Key));
+
+                    var OutputFile = ChosenFile.Substring(0, ChosenFile.IndexOf(".") + 1);
+                    OutputFile = OutputFile.Insert(OutputFile.Length - 1, ".Encrypted");
+
+                    ResultText = await Task.Run(() => GetFirst16Bits(Result));
+
+                    State = (int)CurrentAppState.Working;
+                    StateText = "Writing bytes to file!";
+
+                    await Task.Run(() => File.WriteAllBytes(OutputFile, Result));
+
+                    State = (int)CurrentAppState.LastOperationCompleted;
+                    StateText = "Operation completed!";
+
+                }
+                catch(Exception ex)
+                {
+                    StateText = ex.Message;
+                    return;
+                }
+
             }
 
-
-
-            BitArray Message = new BitArray(File.ReadAllBytes(ChosenFile));
-
-            var generator = new LFSR();
-
-            if(!generator.Initialize(InitialStateText, Message.Count))
-            {
-                State = (int)CurrentAppState.LastOperationFailed;
-                StateText = "Wrong initial state length!";
-                return;
-            }
-
-            MessageText = BitArrayToString(Message);
-
-            State = (int)CurrentAppState.Working;
-            StateText = "Generating a key using LFSR...";
-
-            var Key = new BitArray(Message.Length);
-
-            await Task.Run(() => Key = generator.GenerateKey());
-
-            GeneratedKeyText = BitArrayToString(Key);
-
-            await Task.Run(() => ResultText = BitArrayToString(Message.Xor(Key)));
-
-            State = (int)CurrentAppState.LastOperationCompleted;
-            StateText = "Operation completed!";
-
+            finally { IsNoActionRunning = true; }
+            
         }
 
-        public string BitArrayToString(BitArray array)
+        #endregion
+
+        #region Helper methods
+        /// <summary>
+        /// Returns a string containing 16 bits
+        /// of first 2 elements of the array
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        private string GetFirst16Bits(byte[] array)
         {
             var builder = new StringBuilder();
 
-            foreach (var bit in array.Cast<bool>())
-                builder.Append(bit ? "1" : "0");
+            for(int i = 0; i < 2; ++i)
+            {
+                builder.Append(Convert.ToString(array[i], 2).PadLeft(8,'0'));
+            }
 
             return builder.ToString();
         }
+
+
+        #endregion
+
     }
 }
