@@ -12,7 +12,6 @@ namespace StreamCipher.Core
 {
     /// <summary>
     /// Program to understand the basics of LFSR and Stream cipher. 
-    /// All algorithms there may be unoptimized in sacrifise of understandability
     /// </summary>
     public class ApplicationViewModel : BaseViewModel
     {
@@ -97,47 +96,76 @@ namespace StreamCipher.Core
 
                 var generator = new LFSR();
 
+                //Initialize to check if all requerements met
+
+                if (!generator.Initialize(InitialStateText, new FileInfo(ChosenFile).Length))
+                {
+                    State = (int)CurrentAppState.LastOperationFailed;
+                    StateText = "Wrong initial state length / wrong input!";
+                    return;
+                }
+
                 try
                 {
+                    var isOutputIteration = true;
+                    var KeyBuf = new byte[1024 * 1024 * 10];
+                    var MessageBuf = new byte[1024 * 1024 * 10];
+                    var OutputBuf = new byte[1024 * 1024 * 10];
+
+                    State = (int)CurrentAppState.Working;
+                    StateText = "Working...";
+
+                    //re-initialize to buffer size
+
+                    generator.Initialize(InitialStateText, 1024 * 1024 * 10);
+
+                    using (var OutFStream = new FileStream(GetOutputPath(ChosenFile),FileMode.Create))
                     // Read bytes from file and convert to the binary
-
-                    var Message = await Task.Run(() => File.ReadAllBytes(ChosenFile));
-
-                    if (!generator.Initialize(InitialStateText, Message.Length))
+                    using (var secBinStream = new BinaryWriter(OutFStream))
                     {
-                        State = (int)CurrentAppState.LastOperationFailed;
-                        StateText = "Wrong initial state length!";
-                        return;
+                        using (var FsStream = new FileStream(ChosenFile, FileMode.Open))
+                        using (var binStream = new BinaryReader(FsStream))
+                        {
+                            //read file till the end
+                            while(binStream.BaseStream.Position != binStream.BaseStream.Length)
+                            {
+                                //message buffer
+
+                                MessageBuf = await Task.Run(() => binStream.ReadBytes(1024 * 1024 * 10)); // 10 MB
+
+                                //key buffer
+
+                                KeyBuf = await Task.Run(() => generator.GenerateKey());
+
+                                //output info buffer
+
+                                OutputBuf = await Task.Run(() => MainStreamCipher.EncryptDecrypt(MessageBuf, KeyBuf));
+
+                                await Task.Run(() => secBinStream.Write(OutputBuf));
+
+                                //Used to output data to user 
+                                //(only on first iteration to prevent using large amounts of RAM )
+                                if(isOutputIteration)
+                                {
+                                    MessageText = GetFirst32Bits(MessageBuf);
+
+                                    GeneratedKeyText = GetFirst32Bits(KeyBuf);
+
+                                    ResultText = GetFirst32Bits(OutputBuf);
+                                }
+
+                                isOutputIteration = false;
+                            }
+                        }
                     }
 
-                    State = (int)CurrentAppState.Working;
-                    StateText = "Generating a key using LFSR...";
-
-                    var Key = new byte[Message.Length];
-
-                    await Task.Run(() => Key = generator.GenerateKey());
-
-                    var Result = await Task.Run(() => MainStreamCipher.EncryptDecrypt(Message, Key));
-
-                    MessageText = GetFirst16Bits(Message);
-
-                    GeneratedKeyText = await Task.Run(() => GetFirst16Bits(Key));
-
-                    var OutputFile = ChosenFile.Substring(0, ChosenFile.IndexOf(".") + 1);
-                    OutputFile = OutputFile.Insert(OutputFile.Length - 1, ".Encrypted");
-
-                    ResultText = await Task.Run(() => GetFirst16Bits(Result));
-
-                    State = (int)CurrentAppState.Working;
-                    StateText = "Writing bytes to file!";
-
-                    await Task.Run(() => File.WriteAllBytes(OutputFile, Result));
+                    GC.Collect();
 
                     State = (int)CurrentAppState.LastOperationCompleted;
                     StateText = "Operation completed!";
 
                 }
-                catch(Exception ex)
+                catch (OutOfMemoryException ex)
                 {
                     StateText = ex.Message;
                     return;
@@ -158,17 +186,28 @@ namespace StreamCipher.Core
         /// </summary>
         /// <param name="array"></param>
         /// <returns></returns>
-        private string GetFirst16Bits(byte[] array)
+        private string GetFirst32Bits(byte[] array)
         {
             var builder = new StringBuilder();
 
-            for(int i = 0; i < 2; ++i)
+            for(int i = 0; i < 4; ++i)
             {
                 builder.Append(Convert.ToString(array[i], 2).PadLeft(8,'0'));
             }
 
             return builder.ToString();
         }
+
+        /// <summary>
+        /// Gets string with any extension; 
+        /// Returns a string with .encrypted extension
+        /// </summary>
+        /// <param name="InputPath"></param>
+        /// <returns></returns>
+        private string GetOutputPath(string InputPath)
+        {
+            return InputPath.Insert(InputPath.LastIndexOf('.'), "Encrypted");
+        } 
 
 
         #endregion

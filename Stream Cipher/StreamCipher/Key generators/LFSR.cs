@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Text;
 
 namespace StreamCipher.Core
 {
     /// <summary>
-    /// Generator of pseudo-random keys.(Based on LFSR logic)
+    /// Generator of pseudo-random keys.(Based on LFSR logic) 
+    /// <see cref="https://en.wikipedia.org/wiki/Linear-feedback_shift_register"/>
     /// </summary>
     public class LFSR
     {
@@ -14,7 +16,7 @@ namespace StreamCipher.Core
         /// <summary>
         /// Taps used in LFSR
         /// </summary> 
-        private int[] Taps { get; set; } = { 4, 1 };
+        private int[] Taps { get; set; } = { 27, 8, 7, 1 };
 
         /// <summary>
         /// Initial state of register
@@ -30,24 +32,43 @@ namespace StreamCipher.Core
 
         #region Public methods
          
+        /// <summary>
+        /// Initializator
+        /// </summary>
+        /// <param name="InitialState">Initial state of register</param>
+        /// <param name="MessageLength">Length of key to return</param>
+        /// <returns>if result was successfull - true, otherwise - false</returns>
         public bool Initialize(string InitialState, long MessageLength)
         {
-            if (InitialState.Length != Taps[0])
+
+            var fixedBinaryString = GetFixedBinaryString(InitialState);
+
+            if (fixedBinaryString.Length != Taps[0])
                 return false;
 
-            this.InitialState = Convert.ToInt32(InitialState,2);
+            this.InitialState = Convert.ToInt32(fixedBinaryString, 2);
 
             this.MessageLength = MessageLength;
 
             return true;
         }
 
+
+        /// <summary>
+        /// Initializator
+        /// </summary>
+        /// <param name="InitialState">Initial state of register</param>
+        /// <param name="MessageLength">Length of key to return</param>
+        /// <returns>if result was successfull - true, otherwise - false</returns>
         public bool Initialize(int[] Taps, string InitialState, long MessageLength)
         {
-            if (InitialState.Length != Taps[0])
+
+            var fixedBinaryString = GetFixedBinaryString(InitialState);
+
+            if (fixedBinaryString.Length != Taps[0])
                 return false;
 
-            this.InitialState = Convert.ToInt32(InitialState, 2);
+            this.InitialState = Convert.ToInt32(fixedBinaryString, 2);
 
             this.MessageLength = MessageLength;
 
@@ -62,13 +83,15 @@ namespace StreamCipher.Core
             var Output = new byte[MessageLength];
 
             var CurrentRegisterState = InitialState;
+
+            var keyBit = InitialState >> Taps[0] - 1;
+
             // Byte cycle
             for (int i = 0; i < MessageLength; ++i)
             {
                 //Bit cycle
                 for(int j = 0; j < 8; ++j)
-                {
-                    Output[i] = (byte)( Output[i] | ((CurrentRegisterState & 1) << ( 8 - j - 1)));
+                {   
 
                     int XorResult = 0;
 
@@ -81,9 +104,18 @@ namespace StreamCipher.Core
                     }
 
                     XorResult &= 1;
+                                            // Shift to the MSB side
+                    CurrentRegisterState = (CurrentRegisterState << 1) | (XorResult);
 
-                    // Shift to the LSB side
-                    CurrentRegisterState = (XorResult << Taps[0] - 1) | (CurrentRegisterState >> 1);
+                    // get shifted byte here
+                    keyBit = (CurrentRegisterState >> Taps[0]);
+
+                                        //Get MSB by shifting it to LSB
+                    Output[i] = (byte)(Output[i] | (keyBit << (8 - j - 1)));
+
+                    //Remove shifted byte
+
+                    CurrentRegisterState &= ~(1 << Taps[0]);
                 }
 
             }
@@ -93,5 +125,28 @@ namespace StreamCipher.Core
 
         #endregion
 
+
+        #region Helper methods
+        /// <summary>
+        /// Removes all symbols from string except '0' and '1'
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private string GetFixedBinaryString(string value)
+        {
+            var builder = new StringBuilder();
+
+            foreach (var ch in value)
+            {
+                if ((ch == '0') || (ch == '1'))
+                {
+                    builder.Append(ch);
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        #endregion
     }
 }
