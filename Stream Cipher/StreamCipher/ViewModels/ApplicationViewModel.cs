@@ -190,7 +190,7 @@ namespace StreamCipher.Core
         {
             var builder = new StringBuilder();
 
-            for(int i = 0; i < 4; ++i)
+            for(int i = 0; (i < 4) && (i < array.Length); ++i)
             {
                 builder.Append(Convert.ToString(array[i], 2).PadLeft(8,'0'));
             }
