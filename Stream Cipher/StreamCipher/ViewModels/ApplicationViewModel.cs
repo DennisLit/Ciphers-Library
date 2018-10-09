@@ -107,19 +107,25 @@ namespace StreamCipher.Core
 
                 try
                 {
+                    //use 16 MB because it equals to LFSR period
+
                     var isOutputIteration = true;
-                    var KeyBuf = new byte[1024 * 1024 * 10];
-                    var MessageBuf = new byte[1024 * 1024 * 10];
-                    var OutputBuf = new byte[1024 * 1024 * 10];
+                    var KeyBuf = new byte[1024 * 1024 * 16];
+                    var MessageBuf = new byte[1024 * 1024 * 16];
+                    var OutputBuf = new byte[1024 * 1024 * 16];
 
                     State = (int)CurrentAppState.Working;
                     StateText = "Working...";
 
                     //re-initialize to buffer size
 
-                    generator.Initialize(InitialStateText, 1024 * 1024 * 10);
+                    generator.Initialize(InitialStateText, 1024 * 1024 * 16);
 
-                    using (var OutFStream = new FileStream(GetOutputPath(ChosenFile),FileMode.Create))
+                    //key buffer
+
+                    KeyBuf = await Task.Run(() => generator.GenerateKey());
+
+                    using (var OutFStream = new FileStream(GetOutputPath(ChosenFile), FileMode.Create))
                     // Read bytes from file and convert to the binary
                     using (var secBinStream = new BinaryWriter(OutFStream))
                     {
@@ -131,13 +137,10 @@ namespace StreamCipher.Core
                             {
                                 //message buffer
 
-                                MessageBuf = await Task.Run(() => binStream.ReadBytes(1024 * 1024 * 10)); // 10 MB
+                                MessageBuf = await Task.Run(() => binStream.ReadBytes(1024 * 1024 * 16)); // 16 MB
 
-                                //key buffer
-
-                                KeyBuf = await Task.Run(() => generator.GenerateKey());
-
-                                //output info buffer
+                                //use same keyBuf because period 
+                                //of our LFSR equals to 2^m where m is highest power in polynom
 
                                 OutputBuf = await Task.Run(() => MainStreamCipher.EncryptDecrypt(MessageBuf, KeyBuf));
 
@@ -147,11 +150,11 @@ namespace StreamCipher.Core
                                 //(only on first iteration to prevent using large amounts of RAM )
                                 if(isOutputIteration)
                                 {
-                                    MessageText = GetFirst32Bits(MessageBuf);
+                                    MessageText = GetFirst8Bytes(MessageBuf);
 
-                                    GeneratedKeyText = GetFirst32Bits(KeyBuf);
+                                    GeneratedKeyText = GetFirst8Bytes(KeyBuf);
 
-                                    ResultText = GetFirst32Bits(OutputBuf);
+                                    ResultText = GetFirst8Bytes(OutputBuf);
                                 }
 
                                 isOutputIteration = false;
@@ -181,16 +184,16 @@ namespace StreamCipher.Core
 
         #region Helper methods
         /// <summary>
-        /// Returns a string containing 16 bits
-        /// of first 2 elements of the array
+        /// Returns a string containing 8 bytes
+        /// in bit representation of an array
         /// </summary>
         /// <param name="array"></param>
         /// <returns></returns>
-        private string GetFirst32Bits(byte[] array)
-        {
+        private string GetFirst8Bytes(byte[] array)
+        { 
             var builder = new StringBuilder();
 
-            for(int i = 0; (i < 4) && (i < array.Length); ++i)
+            for(int i = 0; (i < 8) && (i < array.Length); ++i)
             {
                 builder.Append(Convert.ToString(array[i], 2).PadLeft(8,'0'));
             }
