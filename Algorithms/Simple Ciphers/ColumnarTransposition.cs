@@ -1,9 +1,9 @@
-﻿using CryptoCore.Core;
+﻿using CiphersLibrary.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CryptoCore.Algorithms
+namespace CiphersLibrary.Algorithms
 {
     public class ColumnarTransposition : ISimpleCipheringAlgorithm
     {

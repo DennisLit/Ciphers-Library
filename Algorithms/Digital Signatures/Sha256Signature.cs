@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CryptoCore.Algorithms
+namespace CiphersLibrary.Algorithms
 {
     public class Sha256Signature : RsaSignature
     {
@@ -65,7 +65,7 @@ namespace CryptoCore.Algorithms
             }
         }
 
-        protected uint[] HashFunc(byte[] message)
+        protected new uint[] HashFunc(byte[] message)
         {
             var hashFunc = new Sha256();
 

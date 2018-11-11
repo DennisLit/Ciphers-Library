@@ -1,7 +1,7 @@
 ﻿using System;
-using CryptoCore.Data;
+using CiphersLibrary.Data;
 
-namespace CryptoCore.Algorithms
+namespace CiphersLibrary.Algorithms
 {
     public interface IKeyGenerator
     {

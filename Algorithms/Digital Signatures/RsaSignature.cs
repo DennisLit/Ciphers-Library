@@ -1,9 +1,9 @@
-﻿using CryptoCore.Core;
+﻿using CiphersLibrary.Core;
 using System;
 using System.IO;
 using System.Text;
 
-namespace CryptoCore.Algorithms
+namespace CiphersLibrary.Algorithms
 {
     public class RsaSignature : ISignatureCheckingAlgorithm<int>
     {

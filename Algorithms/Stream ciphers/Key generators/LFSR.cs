@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Security.Cryptography;
 using System.Text;
-using CryptoCore.Data;
+using CiphersLibrary.Data;
 
-namespace CryptoCore.Algorithms
+namespace CiphersLibrary.Algorithms
 {
     /// <summary>
     /// Generator of pseudo-random keys.(Based on LFSR logic) 

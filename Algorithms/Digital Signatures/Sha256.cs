@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CryptoCore.Extension_Methods;
+using CiphersLibrary.Extension_Methods;
 
-namespace CryptoCore.Algorithms
+namespace CiphersLibrary.Algorithms
 {
     public class Sha256 : IHashFunction<uint[]>
     {
@@ -87,6 +87,9 @@ namespace CryptoCore.Algorithms
 
         }
 
+
+        #region Private methods
+
         private void InitHashValues()
         {
             InitialHashes[0] = 0x6a09e667;
@@ -98,8 +101,6 @@ namespace CryptoCore.Algorithms
             InitialHashes[6] = 0x1f83d9ab;
             InitialHashes[7] = 0x5be0cd19;
         }
-
-        #region Private methods
 
         private void ProcessBlock()
         {

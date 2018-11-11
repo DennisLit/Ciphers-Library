@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CryptoCore.Extension_Methods
+namespace CiphersLibrary.Extension_Methods
 {
     public static class UIntExtensions
     {

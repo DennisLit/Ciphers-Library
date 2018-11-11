@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CryptoCore.Core
+namespace CiphersLibrary.Core
 { 
     public static class ExtensionMethods
     {

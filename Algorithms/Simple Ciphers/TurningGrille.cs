@@ -1,8 +1,8 @@
-﻿using CryptoCore.Core;
-using CryptoCore.Helpers;
+﻿using CiphersLibrary.Core;
+using CiphersLibrary.Helpers;
 using System;
 
-namespace CryptoCore.Algorithms
+namespace CiphersLibrary.Algorithms
 {
 
     /// <summary>

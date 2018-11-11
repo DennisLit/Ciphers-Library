@@ -1,7 +1,7 @@
-﻿using CryptoCore.Algorithms;
-using CryptoCore.Data;
+﻿using CiphersLibrary.Algorithms;
+using CiphersLibrary.Data;
 
-namespace CryptoCore.Core
+namespace CiphersLibrary.Core
 {
     /// <summary>
     /// Factory for creating simple algorithm instance

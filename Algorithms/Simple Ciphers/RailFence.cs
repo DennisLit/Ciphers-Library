@@ -1,9 +1,9 @@
-﻿using CryptoCore.Core;
+﻿using CiphersLibrary.Core;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace CryptoCore.Algorithms
+namespace CiphersLibrary.Algorithms
 {
     public class RailFence : ISimpleCipheringAlgorithm
     {

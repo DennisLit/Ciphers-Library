@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CryptoCore.Algorithms;
-using CryptoCore.Data;
+using CiphersLibrary.Algorithms;
+using CiphersLibrary.Data;
 
-namespace CryptoCore.Core
+namespace CiphersLibrary.Core
 {
     public class KeyGeneratorsFactory : IKeyGeneratorsFactory
     {

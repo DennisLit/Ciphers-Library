@@ -1,4 +1,4 @@
-﻿namespace CryptoCore.Helpers
+﻿namespace CiphersLibrary.Helpers
 {
     /// <summary>
     /// Class for making stuff w/ matrix

@@ -1,5 +1,5 @@
-﻿using CryptoCore.Data;
-namespace CryptoCore.Core
+﻿using CiphersLibrary.Data;
+namespace CiphersLibrary.Core
 {
     interface ISimpleCipheringAlgorithmFactory
     {

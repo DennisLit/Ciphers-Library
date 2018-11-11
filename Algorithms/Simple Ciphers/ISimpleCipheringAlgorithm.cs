@@ -1,4 +1,4 @@
-﻿namespace CryptoCore.Core
+﻿namespace CiphersLibrary.Core
 {
     public interface ISimpleCipheringAlgorithm
     {

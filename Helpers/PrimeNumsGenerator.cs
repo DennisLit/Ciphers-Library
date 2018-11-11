@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CryptoCore.Core
+namespace CiphersLibrary.Core
 {
     public static class PrimeNumsGenerator
     {

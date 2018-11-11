@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace CryptoCore.Algorithms 
+namespace CiphersLibrary.Algorithms 
 { 
     public static class NumericAlgorithms
     {

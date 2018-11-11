@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CryptoCore.Data
+namespace CiphersLibrary.Data
 {
     public enum KeyGenerators
     {

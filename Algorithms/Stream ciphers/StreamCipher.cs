@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CryptoCore.Data;
+using CiphersLibrary.Data;
 
-namespace CryptoCore.Algorithms
+namespace CiphersLibrary.Algorithms
 {
     public class StreamCipher : IAsyncStreamCipher
     { 

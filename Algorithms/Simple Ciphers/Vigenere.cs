@@ -1,7 +1,7 @@
-﻿using CryptoCore.Core;
+﻿using CiphersLibrary.Core;
 using System.Linq;
 
-namespace CryptoCore.Algorithms
+namespace CiphersLibrary.Algorithms
 {
     public class Vigenere : ISimpleCipheringAlgorithm
     {

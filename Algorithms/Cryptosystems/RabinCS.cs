@@ -1,4 +1,4 @@
-﻿using CryptoCore.Core;
+﻿using CiphersLibrary.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +7,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CryptoCore.Algorithms
+namespace CiphersLibrary.Algorithms
 {
     /// <summary>
     /// Rabin Cryptosystem. 

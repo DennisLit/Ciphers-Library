@@ -1,4 +1,4 @@
-﻿namespace CryptoCore.Algorithms
+﻿namespace CiphersLibrary.Algorithms
 {
     interface ISignatureCheckingAlgorithm<T>
     {
