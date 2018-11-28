@@ -19,5 +19,6 @@ Library of ciphers written in c#.
 
 **Digital signature algorithms**
 
-1. Sha-256 
-2. RSA
+1. RSA, including such hash functions as:
+  A)Some weird one(don't use it)
+  B)SHA-1
