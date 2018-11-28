@@ -10,7 +10,7 @@ namespace CiphersLibrary.Algorithms
     /// </summary>
     public class YarmolikRabinCS : IYarmolikRabinCryptoSystem
     {
-        private readonly int maxRusUnicodeIndx = 2100;
+        private readonly int maxRusUnicodeIndx = 1100;
 
         #region Public methods
 
@@ -33,12 +33,17 @@ namespace CiphersLibrary.Algorithms
                 string ToEncrypt = File.ReadAllText(filePath, Encoding.Default);
 
                 using (var FirstFileStream = new FileStream(GetOutputEncryptedPath(filePath), FileMode.Create, FileAccess.Write))
+                using (var SecondFileStream = new FileStream(GetOutputEncryptedSymbolsPath(filePath), FileMode.Create, FileAccess.Write))
                 using (var SWriter = new StreamWriter(FirstFileStream))
-                {
+                using (var secWriter = new StreamWriter(SecondFileStream))
+                { 
 
                     foreach (var ch in ToEncrypt)
                     {
-                        SWriter.Write(Encrypt(publicKey, b, Convert.ToInt32(ch)).ToString() + " ");
+                        var result = Encrypt(publicKey, b, Convert.ToInt32(ch));
+                        SWriter.Write(result.ToString() + " ");
+                        var output = Encoding.Unicode.GetString(BitConverter.GetBytes(result));
+                        secWriter.Write(output);
                     }
 
                 }
@@ -59,9 +64,11 @@ namespace CiphersLibrary.Algorithms
             {
                 using (var FsStream = new FileStream(filePath, FileMode.Open))
                 using (var FirstFileStream = new FileStream(GetOutputDecryptedPath(filePath), FileMode.Create, FileAccess.Write))
-                using (var bWriter = new BinaryWriter(FirstFileStream))
+                using (var SecondFileStream = new FileStream(GetOutputDecryptedSymbolsPath(filePath), FileMode.Create, FileAccess.Write))
+                using (var bWriter = new StreamWriter(FirstFileStream))
+                using (var secWriter = new StreamWriter(SecondFileStream))
                 using (var sr = new StreamReader(FsStream))
-                {
+                { 
                     string cipherText;
 
                     while ((cipherText = GetEncryptedChunk(sr)) != null)
@@ -72,10 +79,11 @@ namespace CiphersLibrary.Algorithms
                         foreach (var result in results)
                         {
                             bWriter.Write(Encoding.Unicode.GetString(BitConverter.GetBytes(result)));
+                            secWriter.Write(result.ToString() + " ");
                         }
 
                         bWriter.Write(Environment.NewLine);
-
+                        secWriter.Write(Environment.NewLine);
                     }
 
                 }
@@ -98,7 +106,7 @@ namespace CiphersLibrary.Algorithms
         /// <returns></returns>
         private long Encrypt(int publicKey, int b, int plainText)
         {
-            return (plainText < publicKey) ? plainText * (plainText + b) % publicKey : throw new ArgumentException($"Length of public key must be more than {maxRusUnicodeIndx}!");
+            return (plainText < publicKey) ? (plainText * (plainText + b)) % publicKey : throw new ArgumentException($"Length of public key must be more than {maxRusUnicodeIndx}!");
         }
 
         private int[] Decrypt(int FirstPrime, int SecondPrime, int b, int cipherText)
@@ -119,17 +127,21 @@ namespace CiphersLibrary.Algorithms
             int d1, d2, d3, d4;
 
             d1 = (yp * FirstPrime * mq + yq * SecondPrime * mp) % publicKey;
+            d1 = (d1 >= 0) ? d1 : NumericAlgorithms.NegativeMod(yp * FirstPrime * mq + yq * SecondPrime * mp, publicKey);
+           // do { d1 += publicKey; } while (d1 <= 0);
 
             d2 = publicKey - d1;
 
             d3 = (yp * FirstPrime * mq - yq * SecondPrime * mp) % publicKey;
+            d3 = (d3 >= 0) ? d3 : NumericAlgorithms.NegativeMod(yp * FirstPrime * mq - yq * SecondPrime * mp, publicKey);
+            //do { d3 += publicKey; } while (d3 <= 0);
 
             d4 = publicKey - d3;
 
-            d1 = CalculateRoot(b, d1, publicKey);
-            d2 = CalculateRoot(b, d2, publicKey);
-            d3 = CalculateRoot(b, d3, publicKey);
-            d4 = CalculateRoot(b, d4, publicKey);
+            d1 = Math.Abs(CalculateRoot(b, d1, publicKey));
+            d2 = Math.Abs(CalculateRoot(b, d2, publicKey));
+            d3 = Math.Abs(CalculateRoot(b, d3, publicKey));
+            d4 = Math.Abs(CalculateRoot(b, d4, publicKey));
 
             return new int[] { d1, d2, d3, d4 };
 
@@ -145,10 +157,21 @@ namespace CiphersLibrary.Algorithms
             return InputPath.Insert(InputPath.LastIndexOf('.'), "Encrypted");
         }
 
+        private static string GetOutputEncryptedSymbolsPath(string InputPath)
+        { 
+            return InputPath.Insert(InputPath.LastIndexOf('.'), "EncryptedSymbols");
+        }
+
         private static string GetOutputDecryptedPath(string InputPath)
         {
             return InputPath.Insert(InputPath.LastIndexOf('.'), "Decrypted");
         }
+
+        private static string GetOutputDecryptedSymbolsPath(string InputPath)
+        { 
+            return InputPath.Insert(InputPath.LastIndexOf('.'), "DecryptedSymbols");
+        }
+
 
         #endregion
 

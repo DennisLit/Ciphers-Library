@@ -12,6 +12,12 @@ namespace CiphersLibrary.Algorithms
     public class LFSR : IKeyGenerator
     {
 
+        #region Public fields
+
+        public static int DefaultHighestPower => 27;
+         
+        #endregion
+
         #region Private fields
 
         /// <summary>
@@ -39,26 +45,22 @@ namespace CiphersLibrary.Algorithms
         /// <param name="InitialState">Initial state of register</param>
         /// <param name="MessageLength">Length of key to return</param>
         /// <returns>if result was successfull - true, otherwise - false</returns>
-        public bool Initialize(string InitialState, long MessageLength)
+        public void Initialize(string InitialState, long MessageLength)
         {
             var fixedBinaryString = GetFixedBinaryString(InitialState);
 
             if (fixedBinaryString.Length != Taps[0])
-                return false;
+                throw new ArgumentException($"Initial state length was not right. Try setting it to default value '{DefaultHighestPower}' ");
 
             this.InitialState = Convert.ToInt32(fixedBinaryString, 2);
 
             this.MessageLength = MessageLength;
-
-            return true;
         }
 
-        public bool Initialize(int initialState, long messageLength)
+        public void Initialize(int initialState, long messageLength)
         {
             InitialState = initialState;
             MessageLength = messageLength;
-
-            return true;
         }
 
 
@@ -68,21 +70,19 @@ namespace CiphersLibrary.Algorithms
         /// <param name="InitialState">Initial state of register</param>
         /// <param name="MessageLength">Length of key to return</param>
         /// <returns>Initial state</returns>
-        public bool Initialize(int[] Taps, string InitialState, long MessageLength)
+        public void Initialize(int[] Taps, string InitialState, long MessageLength)
         {
 
             var fixedBinaryString = GetFixedBinaryString(InitialState);
 
             if (fixedBinaryString.Length != Taps[0])
-                return false;
+                throw new ArgumentException($"Initial state length was not right. Try setting it to default value '{DefaultHighestPower}' ");
 
             this.InitialState = Convert.ToInt32(fixedBinaryString, 2);
 
             this.MessageLength = MessageLength;
 
             this.Taps = Taps;
-
-            return true;
         }
 
         public byte[] GenerateKey()
@@ -133,7 +133,6 @@ namespace CiphersLibrary.Algorithms
         }
 
         #endregion
-
 
         #region Helper methods
         /// <summary>

@@ -8,12 +8,17 @@ namespace CiphersLibrary.Algorithms
 {
     public class Geffe : IKeyGenerator
     {
+
+        #region Ctor
+
         public Geffe()
         {
             FirstLfsr = new LFSR();
             SecondLfsr = new LFSR();
             ThirdLfsr = new LFSR();
         }
+
+        #endregion
 
         #region Default taps
 
@@ -47,12 +52,14 @@ namespace CiphersLibrary.Algorithms
 
         #endregion
 
-        public bool Initialize(string InitialState, long bytesMessageLength)
+        #region Public methods
+
+        public void Initialize(string InitialState, long bytesMessageLength)
         {
             var fixedBinaryString = GetFixedBinaryString(InitialState);
 
             if (fixedBinaryString.Length != Taps2[0])
-                return false;
+                throw new ArgumentException($"Initial state length was not right. Try setting it to default value '{Taps2[0]}' ");
 
             InitialState2 = Convert.ToInt32(InitialState, 2);
             InitialState1 = Convert.ToInt32(InitialState.PadLeft(Taps1[0], '1'), 2);
@@ -63,9 +70,6 @@ namespace CiphersLibrary.Algorithms
             FirstLfsr.Initialize(InitialState1, BytesMessageLength);
             SecondLfsr.Initialize(InitialState2, BytesMessageLength);
             ThirdLfsr.Initialize(InitialState2, BytesMessageLength);
-
-            return true;
-
         }
 
         public byte[] GenerateKey()
@@ -84,7 +88,9 @@ namespace CiphersLibrary.Algorithms
             }
 
             return resultKey;
-        } 
+        }
+
+        #endregion
 
         #region Helper methods
         /// <summary>

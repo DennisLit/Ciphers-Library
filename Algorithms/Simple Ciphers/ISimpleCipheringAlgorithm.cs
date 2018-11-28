@@ -23,7 +23,7 @@
         /// <param name="Alphabet"></param>
         /// <param name="Word"></param>
         /// <returns>Returns error message, if it's null, then initialized successfully</returns>
-        string Initialize(string KeyValue, string Alphabet);
+        void Initialize(string KeyValue, string Alphabet);
 
     }
 }

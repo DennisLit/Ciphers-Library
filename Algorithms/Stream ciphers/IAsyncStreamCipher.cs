@@ -11,8 +11,8 @@ namespace CiphersLibrary.Algorithms
     {
         void Initialize(IKeyGenerator keyGenerator);
 
-        Task<bool> Encrypt(string filePath, string InitialState, IProgress<ProgressChangedEventArgs> progress);
+        Task Encrypt(string filePath, string InitialState, IProgress<ProgressChangedEventArgs> progress);
 
-        Task<bool> Decrypt(string filePath, string InitialState, IProgress<ProgressChangedEventArgs> progress);
+        Task Decrypt(string filePath, string InitialState, IProgress<ProgressChangedEventArgs> progress);
     } 
 }

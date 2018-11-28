@@ -52,8 +52,7 @@
     <Compile Include="Algorithms\Digital Signatures\IHashFunction.cs" />
     <Compile Include="Algorithms\Digital Signatures\ISignatureCheckingAlgorithm.cs" />
     <Compile Include="Algorithms\Digital Signatures\RsaSignature.cs" />
-    <Compile Include="Algorithms\Digital Signatures\Sha256.cs" />
-    <Compile Include="Algorithms\Digital Signatures\Sha256Signature.cs" />
+    <Compile Include="Algorithms\Digital Signatures\Sha1.cs" />
     <Compile Include="Algorithms\Digital Signatures\YarmolikHash.cs" />
     <Compile Include="Algorithms\Numeric\NumericAlgorithms.cs" />
     <Compile Include="Algorithms\Simple Ciphers\ColumnarTransposition.cs" />
@@ -67,18 +66,21 @@
     <Compile Include="Algorithms\Stream ciphers\Key generators\LFSR.cs" />
     <Compile Include="Algorithms\Stream ciphers\StreamCipher.cs" />
     <Compile Include="Data\Enums\ECryptosystems.cs" />
+    <Compile Include="Data\Enums\EHashFunction.cs" />
     <Compile Include="Data\Enums\EKeyGenerators.cs" />
     <Compile Include="Data\Enums\ESimpleCiphers.cs" />
     <Compile Include="Data\ProgressChangedEventArgs.cs" />
     <Compile Include="Extension Methods\NumericExtensions.cs" />
     <Compile Include="Extension Methods\String Extensions.cs" />
     <Compile Include="Extension Methods\UintExtensions.cs" />
+    <Compile Include="Factories\HashFunctionFactory.cs" />
+    <Compile Include="Factories\IHashFunctionsFactory.cs" />
     <Compile Include="Factories\IKeyGeneratorsFactory.cs" />
     <Compile Include="Factories\ISimpleCipheringAlgorithmFactory.cs" />
     <Compile Include="Factories\KeyGeneratorsFactory.cs" />
     <Compile Include="Factories\SimpleCipheringAlgorithmFactory.cs" />
     <Compile Include="Helpers\MatrixHelper.cs" />
-    <Compile Include="Helpers\PrimeNumsGenerator.cs" />
+    <Compile Include="Helpers\RandomNumbersGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

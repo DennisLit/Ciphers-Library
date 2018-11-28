@@ -7,6 +7,6 @@ namespace CiphersLibrary.Algorithms
     {
         byte[] GenerateKey();
 
-        bool Initialize(string InitialState, long bytesMessageLength);
+        void Initialize(string InitialState, long bytesMessageLength);
     }
 } 

@@ -151,10 +151,10 @@ namespace CiphersLibrary.Algorithms
             return Output;
         }
 
-        public string Initialize(string KeyValue, string Alphabet)
+        public void Initialize(string KeyValue, string Alphabet)
         {
             if (string.IsNullOrWhiteSpace(Alphabet))
-                return "No alphabet was provided.";
+                throw new ArgumentException("No alphabet was provided.");
 
             InitPattern();
 
@@ -162,7 +162,6 @@ namespace CiphersLibrary.Algorithms
 
             this.Alphabet = Alphabet;
 
-            return null;
         }
 
         #endregion

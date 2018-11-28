@@ -1,11 +1,14 @@
 ﻿using CiphersLibrary.Core;
+using CiphersLibrary.Data;
+using CiphersLibrary.Factories;
 using System;
 using System.IO;
+using System.Numerics;
 using System.Text;
 
 namespace CiphersLibrary.Algorithms
 {
-    public class RsaSignature : ISignatureCheckingAlgorithm<int>
+    public class RsaSignature : ISignatureCheckingAlgorithm<BigInteger>
     {
         #region Ctor
 
@@ -13,27 +16,48 @@ namespace CiphersLibrary.Algorithms
         {
 
         }
-
-        public RsaSignature(int p, int q, int privateKey)
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        /// <param name="p">First prime number</param>
+        /// <param name="q">Second prime number</param>
+        /// <param name="privateKey">Private key d</param>
+        /// <param name="hashFunction">hashfunction to use in algorithm</param>
+        /// <param name="ChecksNeeded">check if data is right </param>
+        public RsaSignature(BigInteger p, BigInteger q, BigInteger privateKey, HashFunction hashFunction, bool ChecksNeeded)
         {
-            if ((!p.CheckIfPrime()) || (!q.CheckIfPrime()))
-                throw new ArgumentException("p and q must be prime numbers!");
+            if (ChecksNeeded)
+            {
+                if ((!p.CheckIfPrime()) || (!q.CheckIfPrime()))
+                    throw new ArgumentException("p and q must be prime numbers!");
+
+                if ((privateKey < 2) || (privateKey > (p - 1) * (q - 1) - 1))
+                    throw new ArgumentException("Private key should be 2 < < (p - 1) * (q - 1) - 1)!");
+
+                if (!NumericAlgorithms.GCD(privateKey, (p - 1) * (q - 1)).Equals(1))
+                    throw new ArgumentException("D should be mutually prime with (p - 1) * (q - 1)");
+            }
 
             Modulus = p * q;
 
             PublicExp = NumericAlgorithms.ExtendedGCD((p - 1) * (q - 1), privateKey);
 
             PrivateExp = privateKey;
+
+            HashFunc = new HashFunctionFactory().NewHashFunction(Modulus, hashFunction);
         }
 
         #endregion
 
         #region Private props
-        private int Modulus { get; set; } = 11 * 19;
 
-        private int PrivateExp { get; set; } = 67;
+        private BigInteger Modulus { get; set; } = 11 * 19;
 
-        public int PublicExp { get; set; } = 43;
+        private BigInteger PrivateExp { get; set; } = 67;
+
+        private BigInteger PublicExp { get; set; } = 43;
+
+        private IHashFunction HashFunc { get; set; }
 
         #endregion
 
@@ -43,11 +67,11 @@ namespace CiphersLibrary.Algorithms
         /// <param name="compressedMessage"></param>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public virtual int Sign(string fileName)
+        public virtual BigInteger Sign(string fileName)
         {
             var messageToCompress = File.ReadAllBytes(fileName);
 
-            var compressedMessage = HashFunc(messageToCompress);
+            var compressedMessage = Digest(messageToCompress);
 
             var result = HashImage(compressedMessage, PrivateExp);
 
@@ -70,12 +94,15 @@ namespace CiphersLibrary.Algorithms
                 if (string.IsNullOrWhiteSpace(signature))
                     throw new ArgumentException("Wrong file to analyze!");
 
-                if(!int.TryParse(signature, out var signatureInt))
+                if(!BigInteger.TryParse(signature, out var signatureInt))
                 {
                     throw new ArgumentException("Wrong signature.");
                 }
 
-                return HashFunc(Encoding.Default.GetBytes(textToAnalyze)) == HashImage(signatureInt, PublicExp);
+                var x1 = Digest(Encoding.Default.GetBytes(textToAnalyze)).ToString();
+                var x2 = HashImage(signatureInt, PublicExp).ToString();
+
+                return Digest(Encoding.Default.GetBytes(textToAnalyze)) == HashImage(signatureInt, PublicExp);
             }
             catch (IOException) { throw; }
             catch (ArgumentException) { throw; }
@@ -83,14 +110,14 @@ namespace CiphersLibrary.Algorithms
         }
 
         /// <summary>
-        /// Hash function for signing the file
+        /// Generates hash of the message
         /// </summary>
         /// <param name="message"></param>
         /// <param name="startHash"></param>
         /// <returns></returns>
-        protected virtual int HashFunc(byte[] message)
+        protected virtual BigInteger Digest(byte[] message)
         {
-            return new YarmolikHash(Modulus).GenerateHash(message);
+            return HashFunc.IntHash(message);
         }
 
         /// <summary>
@@ -99,8 +126,11 @@ namespace CiphersLibrary.Algorithms
         /// <param name="message"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        protected virtual int HashImage(int message, int key)
+        protected virtual BigInteger HashImage(BigInteger message, BigInteger key)
         {
+            if (((message > 0) ? message : -message) >= Modulus)
+                throw new ArgumentException("Modulus p * q was too small.");
+
             return NumericAlgorithms.FastExp(message, key, Modulus);
         }
 

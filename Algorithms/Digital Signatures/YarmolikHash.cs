@@ -2,25 +2,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace CiphersLibrary.Algorithms
 {
-    public class YarmolikHash : IHashFunction<int>
+    public class YarmolikHash : IHashFunction
     {
-        public YarmolikHash(int modulus)
+        public YarmolikHash(BigInteger modulus)
         {
             this.modulus = modulus;
         }
 
-        private readonly int startHashValue = 100;
+        private readonly BigInteger startHashValue = 100;
 
-        private readonly int modulus;
+        private readonly BigInteger modulus;
 
-        public int GenerateHash(byte[] message)
+        private BigInteger GenerateHash(byte[] message)
         {
-            var returnValue = 0; 
+            var returnValue = new BigInteger(); 
 
             for (int i = 0; i < message.Length; ++i)
             {
@@ -28,6 +29,16 @@ namespace CiphersLibrary.Algorithms
             }
 
             return returnValue;
+        }
+
+        public BigInteger IntHash(byte[] message)
+        {
+            return GenerateHash(message);
+        }
+
+        public string HexHash(byte[] message)
+        {
+            return GenerateHash(message).ToString("X");
         }
     }
 }

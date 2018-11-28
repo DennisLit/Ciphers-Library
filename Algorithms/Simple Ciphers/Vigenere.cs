@@ -1,4 +1,5 @@
 ﻿using CiphersLibrary.Core;
+using System;
 using System.Linq;
 
 namespace CiphersLibrary.Algorithms
@@ -81,22 +82,21 @@ namespace CiphersLibrary.Algorithms
 
         }
 
-        public string Initialize(string KeyValue, string Alphabet)
+        public void Initialize(string KeyValue, string Alphabet)
         {
             if (string.IsNullOrWhiteSpace(KeyValue))
-                return "Wrong Key!";
+                throw new ArgumentException("Wrong Key!");
 
             KeyValue = KeyValue.ToUpper();
 
             for (int i = 0; i < KeyValue.Length; ++i)
             {
                 if (!Alphabet.Contains(KeyValue[i]))
-                    return "Key value doesnt match the alphabet!";
+                    throw new ArgumentException("Key value doesnt match the alphabet!");
             }
 
             this.keyWord = KeyValue;
             this.Alphabet = Alphabet;
-            return null;
         }
 
 

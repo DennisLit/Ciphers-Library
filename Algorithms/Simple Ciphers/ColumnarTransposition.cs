@@ -60,29 +60,27 @@ namespace CiphersLibrary.Algorithms
             return CreateEncryptOutput();
         }
 
-        public string Initialize(string KeyValue, string Alphabet)
+        public void Initialize(string KeyValue, string Alphabet)
         {
             if (string.IsNullOrWhiteSpace(KeyValue))
-                return "Wrong Key!";
+                throw new ArgumentException ("Wrong Key!");
 
             KeyValue = KeyValue.ToUpper();
 
             for (int i = 0; i < KeyValue.Length; ++i)
             {
                 if (!Alphabet.Contains(KeyValue[i]))
-                    return "Key value doesnt match the alphabet!";
+                    throw new ArgumentException("Key value doesnt match the alphabet!");
             }
 
             for (int i = 0; i < KeyValue.Length; ++i)
             {
                 if (KeyValue.IndexOf(KeyValue[i]) != KeyValue.LastIndexOf(KeyValue[i]))
-                    return "Key value must contain unique letters!";
+                    throw new ArgumentException("Key value must contain unique letters!");
             }
 
             this.keyWord = KeyValue;
             this.Alphabet = Alphabet;
-
-            return null;
         }
 
         #endregion

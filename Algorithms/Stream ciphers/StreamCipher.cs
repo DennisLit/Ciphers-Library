@@ -20,17 +20,15 @@ namespace CiphersLibrary.Algorithms
             this.KeyGeneratorInstance = keyGenerator;
         }
 
-        public async Task<bool> Encrypt(string filePath, string InitialState, IProgress<ProgressChangedEventArgs> progress)
+        public async Task Encrypt(string filePath, string InitialState, IProgress<ProgressChangedEventArgs> progress)
         {
             try
             {
-
                 var KeyBuf = new byte[BufferDefaultLength];
                 var MessageBuf = new byte[BufferDefaultLength];
                 var OutputBuf = new byte[BufferDefaultLength];
 
-                if (!KeyGeneratorInstance.Initialize(InitialState, BufferDefaultLength))
-                    return false;
+                KeyGeneratorInstance.Initialize(InitialState, BufferDefaultLength);
 
                 //key buffer
 
@@ -67,18 +65,21 @@ namespace CiphersLibrary.Algorithms
                     }
                 }
 
-                return true;
             }
             catch(OutOfMemoryException)
             {
-                return false;
+                throw;
+            }
+            catch(ArgumentException)
+            {
+                throw;
             }
             
         }
 
-        public async Task<bool> Decrypt(string filePath, string InitialState, IProgress<ProgressChangedEventArgs> progress)
+        public async Task Decrypt(string filePath, string InitialState, IProgress<ProgressChangedEventArgs> progress)
         {
-            return await Encrypt(filePath, InitialState, progress);
+            await Encrypt(filePath, InitialState, progress).ConfigureAwait(false);
         }
 
         public byte[] XorArrays(byte[] first, byte[] second)

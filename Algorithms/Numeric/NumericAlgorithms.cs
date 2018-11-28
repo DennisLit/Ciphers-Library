@@ -6,22 +6,6 @@ namespace CiphersLibrary.Algorithms
     public static class NumericAlgorithms
     {
 
-        public static int GenerateCoprime(int primeInteger)
-        { 
-            int result = 0;
-
-            for (int i = 2; i < primeInteger; ++i)
-            {
-                if (Gcd(primeInteger, i) == 1)
-                {
-                    result = i;
-                    break;
-                }
-            }
-
-            return result;
-        }
-
         public static int FastExp(int number, int power, int modulus)
         {
             int a = number;
@@ -38,24 +22,6 @@ namespace CiphersLibrary.Algorithms
                 x = (x * a) % modulus;
             }
             return x;
-        }
-
-        public static int Gcd(int a, int b)
-        {
-            int temp = 0;
-            if (a < b)
-            {
-                temp = a;
-                a = b;
-                b = temp;
-            }
-            while (b != 0)
-            {
-                temp = a % b;
-                a = b;
-                b = temp;
-            }
-            return a;
         }
 
         /// <summary>
@@ -80,17 +46,36 @@ namespace CiphersLibrary.Algorithms
             return d;
         }
 
-        public static int ExtendedGCD(int a, int b)
+        public static BigInteger GCD(BigInteger a, BigInteger b)
         {
-            int d0 = a, d1 = b;
-            int x0 = 1, x1 = 0;
-            int y0 = 0, y1 = 1;
+            while (a != 0 && b != 0)
+            {
+                if (a > b)
+                    a %= b;
+                else
+                    b %= a;
+            }
+
+            return a == 0 ? b : a;
+        }
+
+        /// <summary>
+        /// Overload to find multiplicative inversion of b mod a
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static BigInteger ExtendedGCD(BigInteger a, BigInteger b)
+        {
+            BigInteger d0 = a, d1 = b;
+            BigInteger x0 = 1, x1 = 0;
+            BigInteger y0 = 0, y1 = 1;
             while (d1 > 1)
             {
-                int q = d0 / d1;
-                int d2 = d0 % d1;
-                int x2 = x0 - q * x1;
-                int y2 = y0 - q * y1;
+                BigInteger q = d0 / d1;
+                BigInteger d2 = d0 % d1;
+                BigInteger x2 = x0 - q * x1;
+                BigInteger y2 = y0 - q * y1;
                 d0 = d1;
                 d1 = d2;
                 x0 = x1;
@@ -143,6 +128,12 @@ namespace CiphersLibrary.Algorithms
             x = y1 - (b / a) * x1;
             y = x1;
             return d;
+        }
+
+        public static int NegativeMod(int num1, int num2)
+        {
+            num1 = Math.Abs(num1);
+            return (num2 * ((int)Math.Truncate((double)num1 / num2) + 1)) - num1;
         }
 
     }

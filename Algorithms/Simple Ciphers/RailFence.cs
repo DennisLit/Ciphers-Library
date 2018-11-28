@@ -108,17 +108,15 @@ namespace CiphersLibrary.Algorithms
             return Output;
         }
 
-        public string Initialize(string KeyValue, string Alphabet)
+        public void Initialize(string KeyValue, string Alphabet)
         {
             if (!int.TryParse(KeyValue, out int fenceHeight))
-               return "Wrong fence height value!";
+                throw new ArgumentException("Wrong fence height value!");
 
             if ((fenceHeight > 100) || (fenceHeight <= 1))
-                return "Wrong fence height value :(!";
+                throw new ArgumentException("Wrong fence height value :(!");
 
             this.fenceHeight = fenceHeight;
-
-            return null;
         }
 
         #endregion

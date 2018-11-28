@@ -17,5 +17,15 @@ namespace CiphersLibrary.Extension_Methods
         {
             return (value >> count) | (value << (32 - count));
         }
+
+        public static long RotateLeft(this long value, int count)
+        {
+            return (value << count) | (value >> (32 - count));
+        }
+
+        public static long RotateRight(this long value, int count)
+        {
+            return (value >> count) | (value << (32 - count));
+        }
     }
 }
