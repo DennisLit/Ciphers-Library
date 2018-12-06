@@ -50,18 +50,20 @@ namespace CiphersLibrary.Algorithms
 
         private byte[] GenerateHash(byte[] message)
         {
+            //pre-processing procedure
             var resultArray = InitBlocks(message);
 
             InitHashValues();
 
             for (int i = 0; i < BlocksCount; i++)
             {
-                long[] w = new long[80];
+                uint[] w = new uint[80];
 
+                //break chunk into 16 32-bit big-endian words
                 for (int j = 0; j < 16; j++)
                 {
-                    w[j] = ((resultArray[(i * 512 / 8) + 4 * j] << 24) & 0xFF000000) | ((resultArray[i * 512 / 8 + 4 * j + 1] << 16) & (uint)0x00FF0000);
-                    w[j] |= ((resultArray[i * 512 / 8 + 4 * j + 2] << 8) & (uint)0xFF00) | (resultArray[i * 512 / 8 + 4 * j + 3] & (uint)0xFF);
+                    w[j] = ((uint)(resultArray[(i * 512 / 8) + 4 * j] << 24) & 0xFF000000) | ((uint)(resultArray[i * 512 / 8 + 4 * j + 1] << 16) & 0x00FF0000);
+                    w[j] |= ((uint)(resultArray[i * 512 / 8 + 4 * j + 2] << 8) & 0xFF00) | (resultArray[i * 512 / 8 + 4 * j + 3] & (uint)0xFF);
                 }
 
                 // extend 16 words into 80 words
@@ -103,7 +105,7 @@ namespace CiphersLibrary.Algorithms
                         k = 0xCA62C1D6;
                     }
 
-                    uint temp = (uint)(a.RotateLeft(5) + f + e + k + w[j]);
+                    uint temp = a.RotateLeft(5) + f + e + k + w[j];
                     e = d;
                     d = c;
                     c = b.RotateLeft(30);
@@ -119,12 +121,12 @@ namespace CiphersLibrary.Algorithms
 
             }
 
-            // RESULT:
+            // RESULT
             byte[] hash = new byte[20];
             for (int j = 0; j < 4; j++)
             {
                 hash[j] = (byte)((InitialHashes[0] >> 24 - j * 8) & 0xFF);
-
+    
             }
             for (int j = 0; j < 4; j++)
             {
@@ -160,7 +162,7 @@ namespace CiphersLibrary.Algorithms
             Message[Message.Length - 1] = 0x80;
 
             long newBitsLength = Message.Length * 8;
-
+            //append n amount of zero bytes
             while (newBitsLength % 512 != 448)
             {
                 newBitsLength += 8;
@@ -170,10 +172,10 @@ namespace CiphersLibrary.Algorithms
             Array.Copy(Message, 0, appendedZeroesArray, 0, Message.Length);
 
             byte[] resultArray = new byte[appendedZeroesArray.Length + 8];
-
+            //append original message length as 64 bit number(big-endian)
             for (int i = 0; i < 8; i++)
             {
-                resultArray[resultArray.Length - 1 - i] = (byte)(((int)((uint)bitsLength >> (8 * i))) & 0xFF);
+                resultArray[resultArray.Length - 1 - i] = (byte)(((uint)bitsLength >> (8 * i)) & 0xFF);
             }
 
             Array.Copy(appendedZeroesArray, 0, resultArray, 0, appendedZeroesArray.Length);

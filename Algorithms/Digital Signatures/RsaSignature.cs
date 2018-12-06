@@ -4,11 +4,12 @@ using CiphersLibrary.Factories;
 using System;
 using System.IO;
 using System.Numerics;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace CiphersLibrary.Algorithms
 {
-    public class RsaSignature : ISignatureCheckingAlgorithm<BigInteger>
+    public class RsaSignature : IDigitalSignatureAlgorithm<Tuple<BigInteger, BigInteger>>
     {
         #region Ctor
 
@@ -30,10 +31,12 @@ namespace CiphersLibrary.Algorithms
             {
                 if ((!p.CheckIfPrime()) || (!q.CheckIfPrime()))
                     throw new ArgumentException("p and q must be prime numbers!");
-
+                //if privatekey = 1 then signature == h 
+                //if privateKey == phi(n) - 1; then s == 1   
+                //if privateKey > phi(n) then there'll problem with multipl. inversion in equation d*e = 1 mod phi(n)
                 if ((privateKey < 2) || (privateKey > (p - 1) * (q - 1) - 1))
                     throw new ArgumentException("Private key should be 2 < < (p - 1) * (q - 1) - 1)!");
-
+                //We need private key to be prime with phi(n) to find open key later 
                 if (!NumericAlgorithms.GCD(privateKey, (p - 1) * (q - 1)).Equals(1))
                     throw new ArgumentException("D should be mutually prime with (p - 1) * (q - 1)");
             }
@@ -44,7 +47,7 @@ namespace CiphersLibrary.Algorithms
 
             PrivateExp = privateKey;
 
-            HashFunc = new HashFunctionFactory().NewHashFunction(Modulus, hashFunction);
+            HashFunc = (hashFunction == HashFunction.MD5) ? null : new HashFunctionFactory().NewHashFunction(Modulus, hashFunction);
         }
 
         #endregion
@@ -67,7 +70,7 @@ namespace CiphersLibrary.Algorithms
         /// <param name="compressedMessage"></param>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public virtual BigInteger Sign(string fileName)
+        public virtual Tuple<BigInteger,BigInteger> Sign(string fileName)
         {
             var messageToCompress = File.ReadAllBytes(fileName);
 
@@ -81,7 +84,7 @@ namespace CiphersLibrary.Algorithms
                 sw.Write(result.ToString());
             }
 
-            return result;
+            return new Tuple<BigInteger, BigInteger>(result, compressedMessage);
         }
 
         public virtual bool CheckSignature(string fileName)
@@ -94,13 +97,10 @@ namespace CiphersLibrary.Algorithms
                 if (string.IsNullOrWhiteSpace(signature))
                     throw new ArgumentException("Wrong file to analyze!");
 
-                if(!BigInteger.TryParse(signature, out var signatureInt))
+                if (!BigInteger.TryParse(signature, out var signatureInt))
                 {
                     throw new ArgumentException("Wrong signature.");
                 }
-
-                var x1 = Digest(Encoding.Default.GetBytes(textToAnalyze)).ToString();
-                var x2 = HashImage(signatureInt, PublicExp).ToString();
 
                 return Digest(Encoding.Default.GetBytes(textToAnalyze)) == HashImage(signatureInt, PublicExp);
             }
@@ -117,7 +117,7 @@ namespace CiphersLibrary.Algorithms
         /// <returns></returns>
         protected virtual BigInteger Digest(byte[] message)
         {
-            return HashFunc.IntHash(message);
+            return (HashFunc == null) ? new BigInteger(MD5.Create().ComputeHash(message)) : HashFunc.IntHash(message);
         }
 
         /// <summary>

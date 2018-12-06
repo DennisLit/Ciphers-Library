@@ -9,6 +9,7 @@ namespace CiphersLibrary.Data
     public enum HashFunction
     {
         YarmolikHash,
-        Sha1
+        Sha1,
+        MD5
     }
 }

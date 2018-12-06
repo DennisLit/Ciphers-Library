@@ -2,7 +2,7 @@
 using System.Numerics;
 
 namespace CiphersLibrary.Algorithms 
-{ 
+{
     public static class NumericAlgorithms
     {
 

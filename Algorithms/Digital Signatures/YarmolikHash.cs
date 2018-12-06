@@ -21,11 +21,12 @@ namespace CiphersLibrary.Algorithms
 
         private BigInteger GenerateHash(byte[] message)
         {
-            var returnValue = new BigInteger(); 
+            var returnValue = startHashValue; 
 
             for (int i = 0; i < message.Length; ++i)
             {
-                returnValue = NumericAlgorithms.FastExp(startHashValue + message[i], 2, modulus);
+                returnValue = NumericAlgorithms.FastExp(returnValue + (BigInteger)message[i], 2, modulus);
+                var x = returnValue.ToString();
             }
 
             return returnValue;

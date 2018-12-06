@@ -26,7 +26,7 @@ namespace CiphersLibrary.Algorithms
         /// </summary>
         /// <param name="publicKey"></param>
         /// <param name="filePath"></param>
-        public void Encrypt(int publicKey, int b ,string filePath)
+        public void Encrypt(int publicKey, int b, string filePath)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace CiphersLibrary.Algorithms
                 using (var SecondFileStream = new FileStream(GetOutputEncryptedSymbolsPath(filePath), FileMode.Create, FileAccess.Write))
                 using (var SWriter = new StreamWriter(FirstFileStream))
                 using (var secWriter = new StreamWriter(SecondFileStream))
-                { 
+                {
 
                     foreach (var ch in ToEncrypt)
                     {
@@ -68,7 +68,7 @@ namespace CiphersLibrary.Algorithms
                 using (var bWriter = new StreamWriter(FirstFileStream))
                 using (var secWriter = new StreamWriter(SecondFileStream))
                 using (var sr = new StreamReader(FsStream))
-                { 
+                {
                     string cipherText;
 
                     while ((cipherText = GetEncryptedChunk(sr)) != null)
@@ -88,7 +88,7 @@ namespace CiphersLibrary.Algorithms
 
                 }
             }
-            catch(ArgumentException)
+            catch (ArgumentException)
             {
                 throw;
             }
@@ -117,7 +117,7 @@ namespace CiphersLibrary.Algorithms
                 throw new ArgumentException("cipherText", "Ciphertext is larger then public key");
 
             var D = (b * b + (4 * cipherText)) % publicKey;
-             
+
             int mp = NumericAlgorithms.FastExp(D, (FirstPrime + 1) / 4, FirstPrime);
             int mq = NumericAlgorithms.FastExp(D, (SecondPrime + 1) / 4, SecondPrime);
 
@@ -128,7 +128,7 @@ namespace CiphersLibrary.Algorithms
 
             d1 = (yp * FirstPrime * mq + yq * SecondPrime * mp) % publicKey;
             d1 = (d1 >= 0) ? d1 : NumericAlgorithms.NegativeMod(yp * FirstPrime * mq + yq * SecondPrime * mp, publicKey);
-           // do { d1 += publicKey; } while (d1 <= 0);
+            // do { d1 += publicKey; } while (d1 <= 0);
 
             d2 = publicKey - d1;
 
@@ -158,7 +158,7 @@ namespace CiphersLibrary.Algorithms
         }
 
         private static string GetOutputEncryptedSymbolsPath(string InputPath)
-        { 
+        {
             return InputPath.Insert(InputPath.LastIndexOf('.'), "EncryptedSymbols");
         }
 
@@ -168,7 +168,7 @@ namespace CiphersLibrary.Algorithms
         }
 
         private static string GetOutputDecryptedSymbolsPath(string InputPath)
-        { 
+        {
             return InputPath.Insert(InputPath.LastIndexOf('.'), "DecryptedSymbols");
         }
 
@@ -202,7 +202,7 @@ namespace CiphersLibrary.Algorithms
 
         public static int CalculateRoot(int b, int lastRoot, int publicKey)
         {
-            if ( ((lastRoot - b) % 2) == 0 )
+            if (((lastRoot - b) % 2) == 0)
                 return ((-b + lastRoot) / 2) % publicKey;
             else
                 return ((-b + publicKey + lastRoot) / 2) % publicKey;
